@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Recognition App</title>
+<style>
+body { font-family:'Segoe UI', sans-serif; background:#f0f2f5; margin:0; padding:0;}
+h1{text-align:center;padding:20px;color:#333;}
+.container{max-width:900px;margin:0 auto;padding:20px;}
+form{background:#fff;padding:15px;margin-bottom:20px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+input[type="text"], input[type="file"]{padding:8px;margin:5px 0;width:100%;border-radius:5px;border:1px solid #ccc;}
+button{padding:10px 20px;margin-top:10px;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;transition:0.3s;}
+button:hover{background:#0056b3;}
+.preview-img{max-width:150px;margin-top:10px;border-radius:10px;border:1px solid #ccc;}
+.gallery{display:flex;flex-wrap:wrap;gap:15px;}
+.card{flex:1 1 200px;background:#fff;padding:10px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,0.1);text-align:center;}
+.card img{max-width:100%;border-radius:10px;margin-top:5px;}
+.flex-images{display:flex;justify-content:space-around;margin-top:10px;}
+.flex-images div{text-align:center;}
+small{display:block;margin-top:5px;font-weight:bold;color:#555;}
+</style>
+</head>
+<body>
+<h1>Face Recognition App</h1>
+<div class="container">
+
+<!-- REGISTER -->
+<form id="registerForm">
+<h2>Register Face</h2>
+<input type="text" id="username" placeholder="Enter Name" required>
+<input type="file" id="registerImage" accept="image/*" required>
+<img id="registerPreview" class="preview-img" style="display:none;">
+<button type="submit">Register</button>
+</form>
+<div id="registerResult" class="gallery"></div>
+
+<!-- RECOGNIZE -->
+<form id="recognizeForm">
+<h2>Recognize Face</h2>
+<input type="file" id="recognizeImage" accept="image/*" required>
+<img id="recognizePreview" class="preview-img" style="display:none;">
+<button type="submit">Recognize</button>
+</form>
+<div id="recognizeResult" class="gallery"></div>
+
+</div>
+
+<script>
+const baseURL = "/";
+
+// ===== Live Preview =====
+function previewImage(input, previewId){
+    const preview = document.getElementById(previewId);
+    if(input.files && input.files[0]){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.getElementById("registerImage").addEventListener("change",()=>previewImage(event.target,"registerPreview"));
+document.getElementById("recognizeImage").addEventListener("change",()=>previewImage(event.target,"recognizePreview"));
+
+// ===== REGISTER =====
+document.getElementById("registerForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const fileInput = document.getElementById("registerImage");
+    if(!fileInput.files.length) return alert("Select an image!");
+    const formData = new FormData();
+    formData.append("name", username);
+    formData.append("image", fileInput.files[0]);
+    try{
+        const res = await fetch(`${baseURL}register`,{method:"POST",body:formData});
+        const data = await res.json();
+        if(res.ok){
+            const div=document.createElement("div");
+            div.className="card";
+            div.innerHTML=`<strong>${data.name}</strong><img src="/uploads/${data.filename}" alt="${data.filename}">`;
+            const container=document.getElementById("registerResult");
+            container.innerHTML=""; // clear previous
+            container.appendChild(div);
+        } else alert(JSON.stringify(data));
+    }catch(err){console.error(err);alert("Register failed");}
+});
+
+// ===== RECOGNIZE =====
+document.getElementById("recognizeForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const fileInput = document.getElementById("recognizeImage");
+    if(!fileInput.files.length) return alert("Select an image!");
+    const formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+    try{
+        const res = await fetch(`${baseURL}recognize`,{method:"POST",body:formData});
+        const data = await res.json();
+        if(res.ok){
+            const div=document.createElement("div");
+            div.className="card";
+            const uploadedURL = URL.createObjectURL(fileInput.files[0]);
+            const recognizedURL = `/recognized/${data.filename}`;
+            const recognitionType = data.recognition_type;
+            const confidence = data.confidence ? (data.confidence*100).toFixed(2) : "--";
+            div.innerHTML=`
+                <strong>${data.name} (${recognitionType})</strong>
+                <div class="flex-images">
+                    <div><em>Uploaded</em><br><img src="${uploadedURL}" alt="Uploaded"></div>
+                    <div><em>Recognized</em><br><img src="${recognizedURL}" alt="Recognized"></div>
+                </div>
+                <small>Confidence: ${confidence}%</small>
+            `;
+            const container=document.getElementById("recognizeResult");
+            container.innerHTML=""; // clear previous
+            container.appendChild(div);
+        } else alert(JSON.stringify(data));
+    }catch(err){console.error(err);alert("Recognize failed");}
+});
+</script>
+</body>
+</html>

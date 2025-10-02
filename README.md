@@ -1,8 +1,8 @@
-# 🌟 Stratos Face Recognition App
+# 🌟 Face Recognition App
 
 ![Face Recognition Banner](https://images.unsplash.com/photo-1593642532973-d31b6557fa68?fit=crop&w=1200&q=80)
 
-Welcome to **Stratos**, a modern **Face Recognition Web Application** built with **Flask**, **DeepFace**, and **OpenCV**. This app allows you to **register faces**, **recognize unknown faces**, and keeps a **persistent gallery** of all registered and recognized images.  
+A modern **Face Recognition Web Application** built with **Flask**, **DeepFace**, and **OpenCV**. This app allows you to **register faces**, **recognize unknown faces**, and keeps a **persistent gallery** of all registered and recognized images.  
 
 ---
 

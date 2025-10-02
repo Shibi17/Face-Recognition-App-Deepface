@@ -38,3 +38,19 @@ A modern **Face Recognition Web Application** built with **Flask**, **DeepFace**
 
 ---
 
+## 📂 Directory Structure
+
+├─ edge_service/
+│ ├─ app.py
+│ ├─ templates/
+│ │ └─ index.html
+│ ├─ static/
+│ │ ├─ uploads/ # Registered faces
+│ │ └─ recognized/ # Recognized faces
+│ └─ data/
+│ ├─ registered.json
+│ └─ recognized.json
+├─ common/
+│ └─ audit.py
+└─ requirements.txt
+
